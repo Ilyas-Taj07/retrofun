@@ -35,7 +35,7 @@
 .app--container {
 
   --background--color: #f7fdfd;
-  --shadow: 0 0 10px 10px rgba(0, 0, 0, 0.1);
+  --shadow: 0 0 10px 1px rgba(0, 0, 0, 0.1);
   --text-color: #252525;
   --text-hover: #fff;
 

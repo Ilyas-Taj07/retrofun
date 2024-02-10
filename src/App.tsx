@@ -4,6 +4,8 @@ import Users from './Users';
 import Dashboard from './Dashboard';
 import { Routes, Route } from 'react-router-dom'
 import JoinRoom from './JoinRoom';
+import { connect } from 'socket.io-client';
+export const socket = connect('http://localhost:8081')
 
 const App: React.FC = () => {
   return (

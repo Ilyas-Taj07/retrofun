@@ -55,3 +55,7 @@
 .new-text--actions button:active {
     scale: 0.9;
 }
+
+.text-area-field::placeholder {
+    color: red;
+}

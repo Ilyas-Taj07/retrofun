@@ -3,26 +3,66 @@ import "./App.css"
 import AddIcon from './assets/Icons/plus.png'
 import RetroCard from "./Components/RetroCard";
 import NewText from "./Components/NewText";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import CryptoJS from "crypto-js";
+import { socket } from './App'
+
 
 const Dashboard: React.FC = () => {
+
     const location = useLocation()
+    const navigate = useNavigate()
+    const [roomName, setRoomName] = useState('')
+
+    const [list, setList] = useState<Messages[]>([])
+
+    useEffect(() => {
+
+        if (!!(location.search.split('?')[1])) {
+
+            let value = CryptoJS.AES.decrypt(location.search.split('?')[1].toString().split('|').join('/'), "ILYASHUSSAIN")
+            let parsedData = JSON.parse(value.toString(CryptoJS.enc.Utf8))
+
+            const currentdt = new Date() // current
+            const dt = new Date(parsedData.exp) // previous
+
+            if (`${dt.getMonth() + 1}-${dt.getDate()}-${dt.getFullYear()}` === `${currentdt.getMonth() + 1}-${currentdt.getDate()}-${currentdt.getFullYear()}`) {
+                setRoomName(parsedData.roomId)
+                socket.emit('join_room', {
+                    roomId: location.search.split('?')[1]
+                })
+            }
+            else {
+                navigate('/')
+            }
+
+            // check if the room is there or not
+            // if not there navigate the user to the home page....
+            // if there join him in that group
+        }
+        else {
+            navigate('/')
+        }
+
+    }, [location])
 
 
     useEffect(() => {
 
-        console.log(location.search.split('?')[1])
+        socket.on('get_messages', (data) => {
+            setList(data)
+        })
 
-    }, [location])
+    }, [socket])
 
     return (
         <div className='dashboard--container'>
             <div className='dardboard--title'>
-                <span>Dashboard</span>
+                <span>Dashboard <label style={{ fontSize: "18px", letterSpacing: 1 }}>( {roomName} )</label></span>
             </div>
-            <FirstSection />
-            <SecondSection />
-            <ThirdSection />
+            <FirstSection list={list} />
+            <SecondSection list={list} />
+            <ThirdSection list={list} />
         </div>
     )
 }
@@ -30,24 +70,12 @@ const Dashboard: React.FC = () => {
 export default Dashboard
 
 
-function FirstSection() {
+const FirstSection: React.FC<List> = ({ list }) => {
 
     const [isActive, setIsActive] = useState<boolean>(false)
-    const [list, setList] = useState<string[]>([])
-
-    const handleNewText = (value: string) => {
-        setList(item => [...item, value])
-        setIsActive(false)
-    }
 
     const handleClose = () => {
         setIsActive(false)
-    }
-
-    const handleUpdateValues = (value: string, indexValue: number) => {
-
-        setList(listItem => listItem.map((item, index) => index === indexValue ? value : item))
-
     }
 
     return (
@@ -63,12 +91,12 @@ function FirstSection() {
                     list.length !== 0 && (
                         <>
                             {
-                                list.map((item, index) => {
+                                list.filter(item => item.type === 'want-went-well').map((item, index) => {
                                     return <RetroCard
-                                        text={item}
+                                        text={item.message}
                                         key={index}
                                         index={index}
-                                        handleUpdateValues={handleUpdateValues}
+                                        Id={item.Id}
                                     />
                                 })
                             }
@@ -79,8 +107,9 @@ function FirstSection() {
             {
                 isActive && (
                     <NewText
-                        handleNewText={handleNewText}
                         handleClose={handleClose}
+                        type="want-went-well"
+                        setTextField={setIsActive}
                     />
                 )
             }
@@ -89,24 +118,12 @@ function FirstSection() {
 }
 
 
-function SecondSection() {
+const SecondSection: React.FC<List> = ({ list }) => {
 
     const [isActive, setIsActive] = useState<boolean>(false)
-    const [list, setList] = useState<string[]>([])
-
-    const handleNewText = (value: string) => {
-        setList(item => [...item, value])
-        setIsActive(false)
-    }
 
     const handleClose = () => {
         setIsActive(false)
-    }
-
-    const handleUpdateValues = (value: string, indexValue: number) => {
-
-        setList(listItem => listItem.map((item, index) => index === indexValue ? value : item))
-
     }
 
     return (
@@ -122,12 +139,12 @@ function SecondSection() {
                     list.length !== 0 && (
                         <>
                             {
-                                list.map((item, index) => {
+                                list.filter(item => item.type === 'what-to-be-improved').map((item, index) => {
                                     return <RetroCard
-                                        text={item}
+                                        text={item.message}
                                         key={index}
                                         index={index}
-                                        handleUpdateValues={handleUpdateValues}
+                                        Id={item.Id}
                                     />
                                 })
                             }
@@ -138,8 +155,9 @@ function SecondSection() {
             {
                 isActive && (
                     <NewText
-                        handleNewText={handleNewText}
                         handleClose={handleClose}
+                        type="what-to-be-improved"
+                        setTextField={setIsActive}
                     />
                 )
             }
@@ -147,24 +165,13 @@ function SecondSection() {
     )
 }
 
-function ThirdSection() {
+const ThirdSection: React.FC<List> = ({ list }) => {
 
     const [isActive, setIsActive] = useState<boolean>(false)
-    const [list, setList] = useState<string[]>([])
-
-    const handleNewText = (value: string) => {
-        setList(item => [...item, value])
-        setIsActive(false)
-    }
+    // const [list, setList] = useState<string[]>([])
 
     const handleClose = () => {
         setIsActive(false)
-    }
-
-    const handleUpdateValues = (value: string, indexValue: number) => {
-
-        setList(listItem => listItem.map((item, index) => index === indexValue ? value : item))
-
     }
 
     return (
@@ -180,12 +187,12 @@ function ThirdSection() {
                     list.length !== 0 && (
                         <>
                             {
-                                list.map((item, index) => {
+                                list.filter(item => item.type === 'action-items').map((item, index) => {
                                     return <RetroCard
-                                        text={item}
+                                        text={item.message}
                                         key={index}
                                         index={index}
-                                        handleUpdateValues={handleUpdateValues}
+                                        Id={item.Id}
                                     />
                                 })
                             }
@@ -196,11 +203,25 @@ function ThirdSection() {
             {
                 isActive && (
                     <NewText
-                        handleNewText={handleNewText}
                         handleClose={handleClose}
+                        type='action-items'
+                        setTextField={setIsActive}
                     />
                 )
             }
         </div>
     )
+}
+
+
+interface Messages {
+    Id: number,
+    message: string,
+    type: string,
+    room: string
+}
+
+
+interface List {
+    list: Messages[]
 }
