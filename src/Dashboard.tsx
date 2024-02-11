@@ -44,7 +44,7 @@ const Dashboard: React.FC = () => {
             navigate('/')
         }
 
-    }, [location])
+    }, [location, navigate])
 
 
     useEffect(() => {
@@ -53,7 +53,7 @@ const Dashboard: React.FC = () => {
             setList(data)
         })
 
-    }, [socket])
+    }, [])
 
     return (
         <div className='dashboard--container'>

@@ -12,7 +12,7 @@ const Users: React.FC = () => {
             setCount(data.count)
         })
 
-    }, [socket])
+    }, [])
 
     return <div className='users--container'>
         <div className='app--logo'>
