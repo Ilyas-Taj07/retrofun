@@ -5,7 +5,7 @@ import Dashboard from './Dashboard';
 import { Routes, Route } from 'react-router-dom'
 import JoinRoom from './JoinRoom';
 import { connect } from 'socket.io-client';
-export const socket = connect('http://localhost:8081')
+export const socket = connect('https://retrofun-server.onrender.com')
 
 const App: React.FC = () => {
   return (
